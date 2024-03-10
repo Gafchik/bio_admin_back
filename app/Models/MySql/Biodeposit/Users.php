@@ -2,10 +2,16 @@
 
 namespace App\Models\MySql\Biodeposit;
 
-use App\Models\BaseModel;
+use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class Users extends BaseModel
+class Users extends Authenticatable implements JWTSubject
 {
+    use HasApiTokens, HasFactory, Notifiable;
     protected $connection = 'biodeposit';
     protected $table = 'users';
     protected $fillable = [
@@ -21,4 +27,18 @@ class Users extends BaseModel
     protected $hidden = [
         'password',
     ];
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * Return a key value array, containing any custom claims to be added to the JWT.
+     *
+     * @return array
+     */
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
 }

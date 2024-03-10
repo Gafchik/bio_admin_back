@@ -18,12 +18,6 @@ class LoginRequest extends FormRequest
                 'required',
                 'string'
             ],
-            'code' => [
-                'required',
-                'string',
-                'min:6',
-                'max:6',
-            ]
         ];
     }
 }
