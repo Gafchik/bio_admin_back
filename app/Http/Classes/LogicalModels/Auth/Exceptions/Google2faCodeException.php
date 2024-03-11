@@ -6,10 +6,10 @@ use App\Exceptions\BaseExceptions\BaseException;
 use App\Http\Classes\Structure\HttpStatus;
 use App\Http\Classes\Structure\Lang;
 
-class UnauthorizedException extends BaseException
+class Google2faCodeException extends BaseException
 {
     protected array $langArray = [
-        Lang::RUS => 'Неверный Email или пароль!',
+        Lang::RUS => 'Неверный код!',
     ];
 
     protected $code = HttpStatus::HTTP_UNAUTHORIZED;

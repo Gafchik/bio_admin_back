@@ -8,6 +8,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Users extends Authenticatable implements JWTSubject
 {
@@ -17,6 +18,7 @@ class Users extends Authenticatable implements JWTSubject
     protected $fillable = [
         'email',
         'password',
+        'google2fa_secret',
     ];
 
     /**
@@ -26,6 +28,7 @@ class Users extends Authenticatable implements JWTSubject
      */
     protected $hidden = [
         'password',
+        'remember_token',
     ];
     public function getJWTIdentifier()
     {
@@ -40,5 +43,12 @@ class Users extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims()
     {
         return [];
+    }
+    protected function google2faSecret(): Attribute
+    {
+        return new Attribute(
+            get: fn ($value) =>  decrypt($value),
+            set: fn ($value) =>  encrypt($value),
+        );
     }
 }

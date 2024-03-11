@@ -2,6 +2,7 @@
 
 namespace App\Exceptions;
 
+use App\Http\Facades\ResponseFacade;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
 
@@ -24,7 +25,9 @@ class Handler extends ExceptionHandler
     public function register(): void
     {
         $this->reportable(function (Throwable $e) {
-            dd($e->getMessage());
+            dd($e->getMessage(),$e->getFile(),$e->getLine());
+//            return ResponseFacade::makeBadResponse(new UnknownException($e->getMessage()));
+//            return ResponseFacade::makeBadResponse([]);
         });
     }
 }
