@@ -39,7 +39,7 @@ class AuthController extends BaseController
             $has2Fac = $user['has_2fa_code'];
             if(!$has2Fac){
                 $code2fa = $this->google2fa->generateSecretKey();
-                $this->model->set2fac($user['id'],$code2fa);
+                $this->model->set2fac($user['id'],encrypt($code2fa));
                 $QR_Image =$this->google2fa->getQRCodeInline(
                     config('app.name'),
                     $user['email'],
@@ -70,28 +70,13 @@ class AuthController extends BaseController
     }
     public function google2fac(Google2facRequest $request): JsonResponse
     {
-        $user = Auth::user();
+        $data = $request->validated();
+        $user = $this->model->getUserInfo($data['email']);
+        $code = $data['code'];
+        $secretKey = decrypt($user['secret_key']);
 
-        return $this->makeGoodResponse([$user->email]);
-//        $data = $request->validated();
-//        $user = $this->model->getUserInfo($data['email']);
-//        $code = $data['code'];
-//        $secretKey = $user['secret_key'];
-//
-//        $secretKey = json_decode(base64_decode($user['secret_key']),true);
-////        $secretKey = json_decode(base64_decode($user['secret_key']),true)['value'];
-////        dd($this->google2fa->verifyKey($secretKey,$code));
-//        $google2fa = app('pragmarx.google2fa');
-//
-//        dd(
-//            $secretKey,
-////            $google2fa->verifyKey($secretKey,$code),
-//            json_decode(base64_decode($user['secret_key']),true),
-//        );
-//        if($this->google2fa->verifyKey($secretKey,$code)){
-//            return $this->makeGoodResponse([]);
-//        }else{
-//            return $this->makeBadResponse(new Google2faCodeException());
-//        }
+        return $this->google2fa->verifyKey($secretKey,$code)
+            ? $this->makeGoodResponse([])
+            : $this->makeBadResponse(new Google2faCodeException());
     }
 }
