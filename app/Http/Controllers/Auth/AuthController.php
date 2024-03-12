@@ -20,7 +20,7 @@ class AuthController extends BaseController
         private AuthModel $model
     )
     {
-        $this->google2fa = new Google2FA();;
+        $this->google2fa = new Google2FA();
         $this->middleware('auth:api', ['except' => [
             'login',
         ]]);
