@@ -19,6 +19,5 @@ class FaqController extends BaseController
         return $this->makeGoodResponse(
             $this->model->getFaq()
         );
-//        return $this->makeBadResponse(new test());
     }
 }

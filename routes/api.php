@@ -16,8 +16,10 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-Route::middleware(['throttle:60,1'])->group(function () {
-//    include 'Pages/FAQ/faq.php';
-});
 
 include 'Pages/Auth/auth.php';
+Route::group(['middleware' => ['auth:api']],
+    function () {
+        include 'Pages/FAQ/faq.php';
+    }
+);

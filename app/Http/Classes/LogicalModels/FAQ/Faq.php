@@ -28,32 +28,41 @@ class Faq
     ): array
     {
         $result = [];
-        foreach (Lang::ARRAY_LANG as $lang){
-            foreach ($faq_category as $category){
-                $allTranslate = TransformArrayHelper::callbackSearchAllInArray(
+        foreach ($faq_category as $category){
+            $categoryTrans = [];
+            foreach (Lang::ARRAY_LANG as $lang){
+                $trans = TransformArrayHelper::callbackSearchFirstInArray(
                     $faq_category_translations,
                     function($trans) use ($category,$lang) {
                         return $category['id'] === $trans['faq_category_id']
                             && $trans['locale'] === $lang;
                     }
                 );
-                if(!empty($allTranslate)){
-                    $result[$lang]['category'][] = array_shift($allTranslate);
-                }
+                $categoryTrans[] = $trans ?? ['locale' => $lang];
             }
-            foreach ($faqs as $item){
-                foreach ($faq_translations as $trans){
-                    if(
-                        $item['id'] === $trans['faq_id']
-                        && $trans['locale'] === $lang
-                    ){
-                        $result[$lang]['faq'][] = [
-                            'faq_category_id' => $item['faq_category_id'],
-                            ...$trans
-                        ];
-                    }
+            $faqRes = [];
+            foreach ($faqs as $faq){
+                $faqTrans = [];
+                foreach (Lang::ARRAY_LANG as $lang){
+                    $trans = TransformArrayHelper::callbackSearchFirstInArray(
+                        $faq_translations,
+                        function($trans) use ($faq,$lang) {
+                            return $faq['id'] === $trans['faq_id']
+                                && $trans['locale'] === $lang;
+                        }
+                    );
+                    $faqTrans[] = $trans ?? ['locale' => $lang];
                 }
+                $faqRes = [
+                    'tans' => $faqTrans,
+                    ...$faq
+                ];
             }
+            $result[] = [
+                ...$category,
+                'trans' => $categoryTrans,
+                'faq' => $faqRes
+            ];
         }
         return $result;
     }
