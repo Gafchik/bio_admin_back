@@ -4,6 +4,7 @@ namespace App\Http\Controllers\FAQ;
 
 use App\Http\Classes\LogicalModels\FAQ\Faq;
 use App\Http\Controllers\BaseControllers\BaseController;
+use App\Http\Requests\FAQ\ChangeCategoryRequest;
 use Illuminate\Http\JsonResponse;
 
 class FaqController extends BaseController
@@ -19,5 +20,10 @@ class FaqController extends BaseController
         return $this->makeGoodResponse(
             $this->model->getFaq()
         );
+    }
+    public function changeCategory(ChangeCategoryRequest $request): JsonResponse
+    {
+        $this->model->changeCategory($request->validated());
+        return $this->makeGoodResponse([]);
     }
 }

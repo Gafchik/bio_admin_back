@@ -6,5 +6,6 @@ use Illuminate\Support\Facades\Route;
 Route::group(['prefix' => 'faq',],
     function () {
         Route::post('/', [FaqController::class, 'getFaq']);
+        Route::post('/change-category', [FaqController::class, 'changeCategory']);
     }
 );

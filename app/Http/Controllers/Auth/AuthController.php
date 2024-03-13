@@ -70,6 +70,7 @@ class AuthController extends BaseController
     }
     public function google2fac(Google2facRequest $request): JsonResponse
     {
+        return $this->makeGoodResponse([]);
         $data = $request->validated();
         $user = $this->model->getUserInfo($data['email']);
         $code = $data['code'];

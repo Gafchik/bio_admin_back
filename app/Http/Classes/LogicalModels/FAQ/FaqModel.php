@@ -28,4 +28,27 @@ class FaqModel
             'faq_category_translations' => $this->faq_category_translations->get()->toArray(),
         ];
     }
+    public function updateCategoryProps(array $data): void
+    {
+        $this->faq_category
+            ->where('id', $data['category_id'])
+            ->update([
+                'position' => $data['position'],
+                'status' => (int)$data['status'],
+        ]);
+    }
+    public function updateOrCreateCategoryTrans(int $id,string $lang, string $text): void
+    {
+        $this->faq_category_translations->updateOrCreate(
+            [
+                'faq_category_id' => $id,
+                'locale' => $lang,
+            ],
+            [
+                'name' => $text
+            ]
+        );
+    }
 }
+
+
