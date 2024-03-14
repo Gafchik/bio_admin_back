@@ -3,6 +3,7 @@
 namespace App\Http\Classes\LogicalModels\FAQ;
 
 use App\Http\Classes\Helpers\TransformArray\TransformArrayHelper;
+use App\Http\Classes\Structure\CDateTime;
 use App\Http\Classes\Structure\Lang;
 use App\Models\MySql\Biodeposit\{
     Faq_translations,
@@ -22,10 +23,10 @@ class FaqModel
     public function getFaq(): array
     {
         return [
-            'faqs' => $this->faq->get()->toArray(),
-            'faq_translations' => $this->faq_translations->get()->toArray(),
             'faq_category' => $this->faq_category->get()->toArray(),
             'faq_category_translations' => $this->faq_category_translations->get()->toArray(),
+            'faqs' => $this->faq->get()->toArray(),
+            'faq_translations' => $this->faq_translations->get()->toArray(),
         ];
     }
     public function updateCategoryProps(array $data): void
@@ -48,6 +49,20 @@ class FaqModel
                 'name' => $text
             ]
         );
+    }
+    public function insertCategoryProps(array $data): int
+    {
+        return  $this->faq_category->insertGetId([
+            'position' => $data['position'],
+            'status' => (int)$data['status'],
+            'created_at' => CDateTime::getCurrentDate(),
+            'updated_at' => CDateTime::getCurrentDate(),
+        ]);
+    }
+    public function deleteCategory(int $id): void
+    {
+        $this->faq_category->where('id',$id)->delete();
+        $this->faq_category_translations->where('faq_category_id',$id)->delete();
     }
 }
 
