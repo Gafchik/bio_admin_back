@@ -12,6 +12,7 @@ use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use PragmaRX\Google2FAQRCode\Google2FA;
+use function PHPUnit\Framework\isNull;
 
 class AuthController extends BaseController
 {
@@ -23,8 +24,20 @@ class AuthController extends BaseController
         $this->google2fa = new Google2FA();
         $this->middleware('auth:api', ['except' => [
             'login',
+            'getUserInfo',
         ]]);
         parent::__construct();
+    }
+    public function getUserInfo()
+    {
+        $email = Auth::user()?->email;
+        if(empty($email)){
+            return $this->makeGoodResponse([]);
+        }else{
+            $user = $this->model->getUserInfo($email);
+            unset($user['secret_key']);
+            return $this->makeGoodResponse($user);
+        }
     }
     public function login(LoginRequest $request): JsonResponse
     {
@@ -54,7 +67,6 @@ class AuthController extends BaseController
                     'token' => $token,
                     'type' => 'bearer',
                 ],
-                'user' =>  $user,
                 'has_2fa_code' => $has2Fac,
                 'qr' => $QR_Image ?? null,
 //                'roles' => $roles,

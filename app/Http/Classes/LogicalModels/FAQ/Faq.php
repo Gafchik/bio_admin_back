@@ -42,13 +42,20 @@ class Faq
         $categoryRes = [];
         foreach ($faq_category as $category) {
             $categoryTrans = [];
-            $label = TransformArrayHelper::callbackSearchFirstInArray(
+            $labelRu = TransformArrayHelper::callbackSearchFirstInArray(
                 $faq_category_translations,
                 function ($trans) use ($category) {
                     return $category['id'] === $trans['faq_category_id']
                         && $trans['locale'] === Lang::RUS;
                 }
             )['name'] ?? 'Нет на русском';
+            $labelEn = TransformArrayHelper::callbackSearchFirstInArray(
+                $faq_category_translations,
+                function ($trans) use ($category) {
+                    return $category['id'] === $trans['faq_category_id']
+                        && $trans['locale'] === Lang::ENG;
+                }
+            )['name'] ?? 'No in English';
             foreach (Lang::ARRAY_LANG as $lang) {
                 $trans = TransformArrayHelper::callbackSearchFirstInArray(
                     $faq_category_translations,
@@ -60,7 +67,8 @@ class Faq
                 $categoryTrans[$lang] = $trans['name'] ?? '';
             }
             $categoryRes[] = [
-                'label' => $label,
+                'label_ru' => $labelRu,
+                'label_en' => $labelEn,
                 ...$category,
                 ...$categoryTrans,
             ];
@@ -88,18 +96,31 @@ class Faq
         $faqRes = [];
         foreach ($faqs as $faq){
             $faqTrans = [];
-            $lable = TransformArrayHelper::callbackSearchFirstInArray(
+            $lable_ru = TransformArrayHelper::callbackSearchFirstInArray(
                 $faq_translations,
                 function($trans) use ($faq) {
                     return $faq['id'] === $trans['faq_id']
                         && $trans['locale'] === Lang::RUS;
                 }
             );
-            $categoryName = TransformArrayHelper::callbackSearchFirstInArray(
+            $lable_en = TransformArrayHelper::callbackSearchFirstInArray(
+                $faq_translations,
+                function($trans) use ($faq) {
+                    return $faq['id'] === $trans['faq_id']
+                        && $trans['locale'] === Lang::ENG;
+                }
+            );
+            $categoryName_ru = TransformArrayHelper::callbackSearchFirstInArray(
                 $faq_category_translations,
                 function($trans) use ($faq) {
                     return $faq['faq_category_id'] === $trans['faq_category_id']
                         && $trans['locale'] === Lang::RUS;
+                });
+            $categoryName_en = TransformArrayHelper::callbackSearchFirstInArray(
+                $faq_category_translations,
+                function($trans) use ($faq) {
+                    return $faq['faq_category_id'] === $trans['faq_category_id']
+                        && $trans['locale'] === Lang::ENG;
                 });
             foreach (Lang::ARRAY_LANG as $lang){
                 $trans = TransformArrayHelper::callbackSearchFirstInArray(
@@ -115,9 +136,12 @@ class Faq
                 ];
             }
             $faqRes[] = [
-                'question' => $lable['question'] ?? 'Нет на русском',
-                'answer' => $lable['answer'] ?? 'Нет на русском',
-                'category_name' => $categoryName['name'] ?? 'Нет на русском',
+                'question_ru' => $lable_ru['question'] ?? 'Нет на русском',
+                'question_en' => $lable_en['question'] ?? 'No in English',
+                'answer_ru' => $lable_ru['answer'] ?? 'Нет на русском',
+                'answer_en' => $lable_en['answer'] ?? 'No in English',
+                'category_name_ru' => $categoryName_ru['name'] ?? 'Нет на русском',
+                'category_name_en' => $categoryName_en['name'] ?? 'No in English',
                 ...$faq,
                 ...$faqTrans,
             ];
@@ -128,30 +152,26 @@ class Faq
     }
     public function changeCategory(array $data): void
     {
-        $this->model->updateCategoryProps($data);
-        foreach ($data['locale'] as $key => $value)
-        {
-            $this->model->updateOrCreateCategoryTrans(
-                id: $data['category_id'],
-                lang: $key,
-                text: $value
-            );
-        }
+        $this->model->changeCategory($data);
     }
     public function addCategory(array $data): void
     {
-        $id = $this->model->insertCategoryProps($data);
-        foreach ($data['locale'] as $key => $value)
-        {
-            $this->model->updateOrCreateCategoryTrans(
-                id: $id,
-                lang: $key,
-                text: $value
-            );
-        }
+        $this->model->addCategory($data);
     }
     public function deleteCategory(array $data): void
     {
         $this->model->deleteCategory(id: $data['category_id']);
+    }
+    public function changeFaq(array $data): void
+    {
+        $this->model->updateFaq($data);
+    }
+    public function addFaq(array $data): void
+    {
+        $this->model->addFaq($data);
+    }
+    public function deleteFaq(array $data): void
+    {
+        $this->model->deleteFaq(id: $data['question_id']);
     }
 }

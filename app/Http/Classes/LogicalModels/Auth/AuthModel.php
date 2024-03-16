@@ -4,6 +4,7 @@ namespace App\Http\Classes\LogicalModels\Auth;
 
 use App\Models\MySql\Biodeposit\Roles;
 use App\Models\MySql\Biodeposit\RoleUsers;
+use App\Models\MySql\Biodeposit\User_setting;
 use App\Models\MySql\Biodeposit\UserInfo as UserInfoTable;
 use App\Models\MySql\Biodeposit\Users;
 
@@ -14,6 +15,7 @@ class AuthModel
         private UserInfoTable $userInfo,
         private RoleUsers $roleUsers,
         private Roles $roles,
+        private User_setting $userSetting,
 
     ){}
     public function getUserInfo(string $email): ?array
@@ -25,10 +27,16 @@ class AuthModel
                 '=',
                 'userInfo.user_id'
             )
+            ->leftJoin($this->userSetting->getTable() . ' as userSetting',
+                'userModel.id',
+                '=',
+                'userSetting.user_id'
+            )
             ->where('userModel.email',$email)
             ->select([
                 'userModel.id',
                 'userModel.email',
+                'userSetting.locale',
                 'userModel.permissions',
                 'userModel.is_active_user',
                 'userInfo.first_name',

@@ -29,40 +29,147 @@ class FaqModel
             'faq_translations' => $this->faq_translations->get()->toArray(),
         ];
     }
-    public function updateCategoryProps(array $data): void
+    public function changeCategory(array $data): void
     {
-        $this->faq_category
-            ->where('id', $data['category_id'])
-            ->update([
-                'position' => $data['position'],
-                'status' => (int)$data['status'],
-        ]);
+        $this->faq_category->getConnection()
+            ->transaction(function () use ($data) {
+                $this->faq_category
+                    ->where('id', $data['category_id'])
+                    ->update([
+                        'position' => $data['position'],
+                        'status' => (int)$data['status'],
+                        'updated_at' => CDateTime::getCurrentDate(),
+                    ]);
+                foreach ($data['locale'] as $lang => $text)
+                {
+                    $this->faq_category_translations->updateOrCreate(
+                        [
+                            'faq_category_id' => $data['category_id'],
+                            'locale' => $lang,
+                        ],
+                        [
+                            'name' => $text
+                        ]
+                    );
+                }
+            });
     }
-    public function updateOrCreateCategoryTrans(int $id,string $lang, string $text): void
+    public function addCategory(array $data): void
     {
-        $this->faq_category_translations->updateOrCreate(
-            [
-                'faq_category_id' => $id,
-                'locale' => $lang,
-            ],
-            [
-                'name' => $text
-            ]
-        );
-    }
-    public function insertCategoryProps(array $data): int
-    {
-        return  $this->faq_category->insertGetId([
-            'position' => $data['position'],
-            'status' => (int)$data['status'],
-            'created_at' => CDateTime::getCurrentDate(),
-            'updated_at' => CDateTime::getCurrentDate(),
-        ]);
+        $this->faq_category->getConnection()
+            ->transaction(function () use ($data) {
+                $id = $this->faq_category->insertGetId([
+                    'position' => $data['position'],
+                    'status' => (int)$data['status'],
+                    'created_at' => CDateTime::getCurrentDate(),
+                    'updated_at' => CDateTime::getCurrentDate(),
+                ]);
+                foreach ($data['locale'] as $lang => $text)
+                {
+                    $this->faq_category_translations->updateOrCreate(
+                        [
+                            'faq_category_id' => $id,
+                            'locale' => $lang,
+                        ],
+                        [
+                            'name' => $text
+                        ]
+                    );
+                }
+            });
+
     }
     public function deleteCategory(int $id): void
     {
-        $this->faq_category->where('id',$id)->delete();
-        $this->faq_category_translations->where('faq_category_id',$id)->delete();
+        $this->faq_category->getConnection()
+            ->transaction(function () use ($id) {
+                $this->faq_category->where('id',$id)->delete();
+                $this->faq_category_translations->where('faq_category_id',$id)->delete();
+            });
+    }
+    public function updateFaq(array $data): void
+    {
+        $this->faq->getConnection()
+            ->transaction(function () use ($data) {
+                $this->faq
+                    ->where('id',$data['question_id'])
+                    ->update([
+                        'faq_category_id' => $data['category_id'],
+                        'position' => $data['position'],
+                        'status' => (int)$data['status'],
+                        'updated_at' => CDateTime::getCurrentDate(),
+                    ]);
+                foreach ($data['locale_question'] as $lang => $text)
+                {
+                    $this->faq_translations->updateOrCreate(
+                        [
+                            'faq_id' => $data['question_id'],
+                            'locale' => $lang,
+                        ],
+                        [
+                            'question' => $text
+                        ]
+                    );
+                }
+                foreach ($data['locale_answer'] as $lang => $text)
+                {
+                    $this->faq_translations->updateOrCreate(
+                        [
+                            'faq_id' => $data['question_id'],
+                            'locale' => $lang,
+                        ],
+                        [
+                            'answer' => $text
+                        ]
+                    );
+                }
+            });
+
+    }
+    public function addFaq(array $data): void
+    {
+        $this->faq->getConnection()
+            ->transaction(function () use ($data) {
+                $id = $this->faq->insertGetId([
+                    'faq_category_id' => $data['category_id'],
+                    'position' => $data['position'],
+                    'status' => (int)$data['status'],
+                    'created_at' => CDateTime::getCurrentDate(),
+                    'updated_at' => CDateTime::getCurrentDate(),
+                ]);
+                foreach ($data['locale_question'] as $lang => $text)
+                {
+                    $this->faq_translations->updateOrCreate(
+                        [
+                            'faq_id' => $id,
+                            'locale' => $lang,
+                        ],
+                        [
+                            'question' => $text
+                        ]
+                    );
+                }
+                foreach ($data['locale_answer'] as $lang => $text)
+                {
+                    $this->faq_translations->updateOrCreate(
+                        [
+                            'faq_id' => $id,
+                            'locale' => $lang,
+                        ],
+                        [
+                            'answer' => $text
+                        ]
+                    );
+                }
+            });
+    }
+    public function deleteFaq(int $id): void
+    {
+        $this->faq->getConnection()
+            ->transaction(function () use ($id) {
+                $this->faq->where('id',$id)->delete();
+                $this->faq_translations->where('faq_id',$id)->delete();
+            });
     }
 }
 

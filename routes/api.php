@@ -18,7 +18,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 include 'Pages/Auth/auth.php';
-Route::group(['middleware' => ['auth:api']],
+Route::group(['middleware' => ['jwt.auth']],
     function () {
         include 'Pages/FAQ/faq.php';
     }

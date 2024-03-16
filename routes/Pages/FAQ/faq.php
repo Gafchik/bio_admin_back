@@ -11,5 +11,9 @@ Route::group(['prefix' => 'faq',],
         Route::post('/change-category', [FaqController::class, 'changeCategory']);
         Route::post('/add-category', [FaqController::class, 'addCategory']);
         Route::post('/delete-category', [FaqController::class, 'deleteCategory']);
+
+        Route::post('/change-faq', [FaqController::class, 'changeFaq']);
+        Route::post('/add-faq', [FaqController::class, 'addFaq']);
+        Route::post('/delete-faq', [FaqController::class, 'deleteFaq']);
     }
 );
