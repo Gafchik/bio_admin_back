@@ -21,5 +21,6 @@ include 'Pages/Auth/auth.php';
 Route::group(['middleware' => ['jwt.auth']],
     function () {
         include 'Pages/FAQ/faq.php';
+        include 'Pages/Contacts/contacts.php';
     }
 );
