@@ -51,4 +51,16 @@ class Contacts
         }
         return $result;
     }
+    public function edit(array $data): void
+    {
+        $this->model->edit($data);
+    }
+    public function add(array $data): void
+    {
+        $this->model->add($data);
+    }
+    public function delete(array $data): void
+    {
+        $this->model->delete($data['id']);
+    }
 }
