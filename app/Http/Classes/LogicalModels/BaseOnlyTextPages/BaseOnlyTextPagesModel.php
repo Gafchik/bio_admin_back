@@ -20,4 +20,24 @@ class BaseOnlyTextPagesModel
             ])
             ->toArray();
     }
+    public function edit(array $data): void
+    {
+        $this->pageTranslation->getConnection()
+            ->transaction(function () use ($data) {
+                foreach ($data['lang'] as $lang => $text)
+                {
+                    if(!empty($text)){
+                        $this->pageTranslation->updateOrCreate(
+                            [
+                                'page_id' => $data['id'],
+                                'locale' => $lang,
+                            ],
+                            [
+                                'content' => $text,
+                            ]
+                        );
+                    }
+                }
+            });
+    }
 }

@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 Route::group(['prefix' => 'base-only-text-pages',],
     function () {
         Route::post('/get', [BaseOnlyTextPagesController::class, 'get']);
+        Route::post('/edit', [BaseOnlyTextPagesController::class, 'edit']);
 
     }
 );

@@ -11,4 +11,8 @@ class BaseOnlyTextPages
     {
         return $this->model->get($id);
     }
+    public function edit(array $data): void
+    {
+        $this->model->edit($data);
+    }
 }
