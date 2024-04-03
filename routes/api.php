@@ -24,5 +24,6 @@ Route::group(['middleware' => ['jwt.auth']],
         include 'Pages/Contacts/contacts.php';
         include 'Pages/BaseOnlyTextPages/base-only-text-pages.php';
         include 'Pages/News/news.php';
+        include 'Pages/Gallery/gallery.php';
     }
 );
