@@ -10,8 +10,9 @@ Route::group(
     ],
     function () {
         Route::post('/get-items', [GalleryController::class, 'getItems']);
-//        Route::post('/edit', [NewsController::class, 'edit']);
-//        Route::post('/delete', [NewsController::class, 'delete']);
-//        Route::post('/add', [NewsController::class, 'add']);
+        Route::post('/get-items-album', [GalleryController::class, 'getItemsAlbum']);
+        Route::post('/edit-items-album', [GalleryController::class, 'editItemsAlbum']);
+//        Route::post('/delete', [GalleryController::class, 'delete']);
+//        Route::post('/add', [GalleryController::class, 'add']);
     }
 );

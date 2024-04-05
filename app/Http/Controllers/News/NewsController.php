@@ -44,7 +44,6 @@ class NewsController extends BaseController
     }
     public function add(AddNewsRequest $request)
     {
-        $data = $request->validated();
         $id = $this->model->add($request->validated());
         return $this->makeGoodResponse(['id' => $id]);
     }

@@ -97,17 +97,17 @@ class NewsModel
                     ]);
                 foreach (Lang::ARRAY_LANG as $lang)
                 {
-                        $this->newsTranslations->updateOrCreate(
-                            [
-                                'news_id' => $data['id'],
-                                'locale' => $lang,
-                            ],
-                            [
-                                'name' => $data[$lang]['name'],
-                                'short_content' => $data[$lang]['short_content'],
-                                'content' => $data[$lang]['content'],
-                            ]
-                        );
+                    $this->newsTranslations->updateOrCreate(
+                        [
+                            'news_id' => $data['id'],
+                            'locale' => $lang,
+                        ],
+                        [
+                            'name' => $data[$lang]['name'],
+                            'short_content' => $data[$lang]['short_content'],
+                            'content' => $data[$lang]['content'],
+                        ]
+                    );
                 }
             });
     }

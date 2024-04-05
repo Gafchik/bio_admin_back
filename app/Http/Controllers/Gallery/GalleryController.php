@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers\Gallery;
 
+use App\Exceptions\BaseExceptions\BaseException;
 use App\Http\Classes\LogicalModels\Gallery\Gallery;
 use App\Http\Controllers\BaseControllers\BaseController;
+use App\Http\Requests\Gallery\AlbumIdRequest;
+use App\Http\Requests\Gallery\EditAlbumsRequest;
 use Illuminate\Http\JsonResponse;
 
 class GalleryController extends BaseController
@@ -19,5 +22,21 @@ class GalleryController extends BaseController
         return $this->makeGoodResponse(
             $this->model->getItems(),
         );
+    }
+    public function getItemsAlbum(AlbumIdRequest $request): JsonResponse
+    {
+        $data = $request->validated();
+
+        try {
+            $album = $this->model->getItemsAlbum($data['id']);
+            return $this->makeGoodResponse($album);
+        }catch (BaseException $e){
+            return $this->makeBadResponse($e);
+        }
+    }
+    public function editItemsAlbum(EditAlbumsRequest $request): JsonResponse
+    {
+        $this->model->editItemsAlbum($request->validated());
+        return $this->makeGoodResponse([]);
     }
 }
