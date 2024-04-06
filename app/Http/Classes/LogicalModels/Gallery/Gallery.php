@@ -2,6 +2,8 @@
 
 namespace App\Http\Classes\LogicalModels\Gallery;
 
+use App\Http\Classes\Structure\Lang;
+
 class Gallery
 {
     public function __construct(
@@ -20,13 +22,26 @@ class Gallery
     }
     public function editItemsAlbum(array $data): void
     {
+        $itemsToInsert = $this->getItemsToInsert($data);
+        $this->model->editItemsAlbum($data,$itemsToInsert);
+    }
+    public function addItemsAlbum(array $data): void
+    {
+        $itemsToInsert = $this->getItemsToInsert($data);
+        $this->model->addItemsAlbum($data,$itemsToInsert);
+    }
+    private function getItemsToInsert(array $data): array
+    {
         $itemsToInsert = [];
         foreach ($data['items'] ?? [] as $item) {
             if(!empty($item['video']) || !empty($item['image'])){
                 $itemsToInsert[] = $item;
             }
         }
-//        dd($itemsToInsert);
-        dd($data);
+        return $itemsToInsert;
+    }
+    public function deleteItemsAlbum(array $data): void
+    {
+        $this->model->deleteItemsAlbum($data['id']);
     }
 }
