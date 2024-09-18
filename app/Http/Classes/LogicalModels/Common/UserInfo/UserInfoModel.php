@@ -10,6 +10,8 @@ use App\Models\MySql\Biodeposit\Trees;
 use App\Models\MySql\Biodeposit\UserInfo as UserInfoTable;
 use App\Models\MySql\Biodeposit\Users;
 use App\Models\MySql\Biodeposit\Wallets;
+use App\Models\MySql\Biodeposit\Roles;
+use App\Models\MySql\Biodeposit\RoleUsers;
 use Illuminate\Database\Eloquent\Builder;
 
 class UserInfoModel
@@ -21,6 +23,8 @@ class UserInfoModel
         private UserInfoTable $userInfo,
         private Wallets $wallets,
         private Trees $trees,
+        private Roles $roles,
+        private RoleUsers $roleUsers,
     ){}
     public function getUserInfo(string $fieldName, string $fieldValue): array
     {
@@ -59,7 +63,11 @@ class UserInfoModel
         }
         $user['demo_balance'] = $this->getDemoBalance($user['id']);
         $user['trees'] = $this->getUserTress($user['id']);
-
+        $roles = $this->getUserRole($user['id']);
+        $user['roles'] = [
+          'role' => $roles['role_id'] ?? null,
+          'permissions' => json_decode($roles['permissions'] ?? '[]',true),
+        ];
         $wallets = $this->getWallets($user['id']);
         foreach ($wallets as $wallet){
             if($wallet['type'] === WalletsType::LIVE_PAY){
@@ -72,6 +80,7 @@ class UserInfoModel
         }
         return $user;
     }
+
     private function getBaseUserQuery(): Builder
     {
         return $this->userModel
@@ -81,6 +90,19 @@ class UserInfoModel
                 '=',
                 'userInfo.user_id'
             );
+    }
+    private function getUserRole(int $userId): ?array
+    {
+        return $this->roleUsers
+            ->from($this->roleUsers->getTable(). ' as roleUsers')
+            ->leftJoin($this->roles->getTable() . ' as roles',
+                'roles.id',
+                '=',
+                'roleUsers.role_id'
+            )
+            ->where('roleUsers.user_id',$userId)
+            ->first()
+            ?->toArray();
     }
     private function getDemoBalance(int $userId): array
     {
