@@ -65,7 +65,7 @@ class TransactionsModel
     }
     public function getTransaction(array $data): array
     {
-        // Подзапрос для подсчета количества деталей транзакций
+
         $detailsQuery = $this->details_transactions
             ->select('transaction_id', DB::raw('COUNT(*) as has_details'))
             ->groupBy('transaction_id');
