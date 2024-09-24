@@ -65,8 +65,13 @@ class TransactionsModel
     }
     public function getTransaction(array $data): array
     {
+        // Подзапрос для подсчета количества деталей транзакций
+        $detailsQuery = $this->details_transactions
+            ->select('transaction_id', DB::raw('COUNT(*) as has_details'))
+            ->groupBy('transaction_id');
+
         $query = $this->transactions
-            ->from($this->transactions->getTable(). ' as t')
+            ->from($this->transactions->getTable() . ' as t')
             ->leftJoin($this->wallets->getTable() . ' as w',
                 'w.id',
                 '=',
@@ -97,11 +102,9 @@ class TransactionsModel
                 '=',
                 't.type'
             )
-            ->leftJoin($this->details_transactions->getTable() . ' as dt',
-                'dt.transaction_id',
-                '=',
-                't.id'
-            )
+            ->leftJoinSub($detailsQuery, 'dt', function($join) {
+                $join->on('dt.transaction_id', '=', 't.id');
+            })
             ->select([
                 't.id',
                 't.created_at',
@@ -112,50 +115,66 @@ class TransactionsModel
                 'type.name_rus as type',
                 'status.name_rus as status',
                 't.tree_count',
-                DB::RAW('ROUND(t.total / 100, 2) as total'),
-                DB::RAW('ROUND(t.amount / 100, 2) as amount'),
-                DB::RAW('ROUND(t.commission / 100, 2) as commission'),
+                DB::raw('ROUND(t.total / 100, 2) as total'),
+                DB::raw('ROUND(t.amount / 100, 2) as amount'),
+                DB::raw('ROUND(t.commission / 100, 2) as commission'),
                 't.promocode',
                 't.exchange_currency',
                 't.exchange_rate',
                 'pay.payment_system',
-                'dt.id as has_details',
+                DB::raw('IFNULL(dt.has_details, 0) as has_details') // Учитываем случаи, когда деталей транзакций нет
             ]);
 
-        if(!empty($data['id'])){
-            $query->where('t.id',$data['id']);
-        }else{
-            if(empty($data['dateFromTo']['from']) || empty($data['dateFromTo']['to'] || empty($data['email']))){
+        // Фильтрация по id
+        if (!empty($data['id'])) {
+            $query->where('t.id', $data['id']);
+        } else {
+            // Фильтрация по дате или email, если другие параметры не заданы
+            if (empty($data['dateFromTo']['from']) || empty($data['dateFromTo']['to']) || empty($data['email'])) {
                 $query->limit(500);
             }
-            if(!empty($data['dateFromTo']['from'])){
-                $query->where('t.created_at','>=',$data['dateFromTo']['from']);
+
+            // Фильтр по дате начала
+            if (!empty($data['dateFromTo']['from'])) {
+                $query->where('t.created_at', '>=', $data['dateFromTo']['from']);
             }
-            if(!empty($data['dateFromTo']['to'])){
-                $data['dateFromTo']['to'] = CDateTime::getDateModified($data['dateFromTo']['to'],'+1 day');
-                $query->where('t.created_at','<',$data['dateFromTo']['to']);
+
+            // Фильтр по дате окончания
+            if (!empty($data['dateFromTo']['to'])) {
+                $data['dateFromTo']['to'] = CDateTime::getDateModified($data['dateFromTo']['to'], '+1 day');
+                $query->where('t.created_at', '<', $data['dateFromTo']['to']);
             }
-            if(!is_null($data['email'])){
-                $query->where('u.email',$data['email']);
+
+            // Фильтр по email
+            if (!is_null($data['email'])) {
+                $query->where('u.email', $data['email']);
             }
-            if(!is_null($data['statuses'])){
-                $query->where('t.status',$data['statuses']);
+
+            // Фильтр по статусам
+            if (!is_null($data['statuses'])) {
+                $query->where('t.status', $data['statuses']);
             }
-            if(!is_null($data['type'])){
-                $query->where('t.type',$data['type']);
+
+            // Фильтр по типу
+            if (!is_null($data['type'])) {
+                $query->where('t.type', $data['type']);
             }
         }
+
+        // Выполнение запроса и сортировка
         return $query
             ->orderByDesc('t.id')
             ->get()
             ->toArray();
     }
+
     public function getDocumentData(array $data): array
     {
         $order = $this->orders
             ->where('transaction_id',$data['id'])
             ->first()
             ->toArray();
+
         $user =  $this->getUserInfo(id:$order['user_id']);
         $treeIds = $this->orderDetails
             ->where('order_id',$order['id'])
