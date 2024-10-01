@@ -9,6 +9,7 @@ use DateInterval;
 final class CDateTime
 {
     public const DATE_FORMAT_DB = 'Y-m-d';
+    public const DATE_FORMAT_PICKER = 'Y/m/d';
     public const DATE_FORMAT_DB_FD = 'Y-m-01';
     public const YEAR_MONTH_FORMAT_DB = 'Y-m';
     public const DATETIME_FORMAT_DB = 'Y-m-d H:i:s';
