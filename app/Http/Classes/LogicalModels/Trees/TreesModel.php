@@ -35,8 +35,6 @@ class TreesModel
                 'trees.uuid',
                 'users.email as owner_mail',
                 'trees.season',
-//                'trees.sale_frozen_to',
-//                'trees.dividend_frozen_to',
                 'trees.initial_price',
                 'trees.current_price',
             ])
