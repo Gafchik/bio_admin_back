@@ -26,6 +26,7 @@ Route::group(['middleware' => ['jwt.auth']],
         include 'Pages/News/news.php';
         include 'Pages/Gallery/gallery.php';
         include 'Pages/Transactions/transactions.php';
+        include 'Pages/TreeStore/treestore.php';
         include 'Pages/Question/question.php';
         include 'Pages/Withdraws/withdraws.php';
         include 'Pages/ServerExplorer/server-explorer.php';
