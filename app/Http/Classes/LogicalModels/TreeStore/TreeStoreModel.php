@@ -3,12 +3,12 @@
 namespace App\Http\Classes\LogicalModels\TreeStore;
 
 use App\Http\Classes\Structure\CDateTime;
-use App\Models\MySql\Biodeposit\Trees;
-use App\Models\MySql\Biodeposit\Trees_on_sale;
-use App\Models\MySql\Biodeposit\User_setting;
-use App\Models\MySql\Biodeposit\UserInfo;
-use App\Models\MySql\Biodeposit\Users;
-use Illuminate\Support\Facades\DB;
+use App\Models\MySql\Biodeposit\{
+    Trees,
+    Trees_on_sale,
+    UserInfo,
+    Users,
+};
 
 class TreeStoreModel
 {
@@ -17,7 +17,6 @@ class TreeStoreModel
         private Users $users,
         private UserInfo $userInfo,
         private Trees $trees,
-        private User_setting $userSetting
     ){}
 
     public function getTreeStore(array $data): array
@@ -46,10 +45,8 @@ class TreeStoreModel
                 'u.email',          // Извлекаем email из таблицы users
                 't.commission',
                 'tr.uuid',          // Извлекаем uuid из таблицы trees
-                DB::raw('ROUND(t.price / 100, 2) as amount')
-            ]);
-
-
+            ])
+            ->selectRaw('ROUND(t.price / 100, 2) as amount');
 
         // Фильтрация по id
         if (!empty($data['id'])) {
@@ -88,40 +85,5 @@ class TreeStoreModel
             ->orderByDesc('t.id')
             ->get()
             ->toArray();
-    }
-
-    public function getUserInfo(int $id): ?array
-    {
-        $result = $this->users
-            ->from($this->users->getTable(). ' as userModel')
-            ->leftJoin($this->userInfo->getTable() . ' as userInfo',
-                'userModel.id',
-                '=',
-                'userInfo.user_id'
-            )
-            ->leftJoin($this->userSetting->getTable() . ' as userSetting',
-                'userModel.id',
-                '=',
-                'userSetting.user_id'
-            )
-            ->where('userModel.id',$id)
-            ->select([
-                'userModel.id',
-                'userModel.email',
-                'userSetting.locale',
-                'userModel.permissions',
-                'userModel.is_active_user',
-                'userInfo.first_name as lastName',
-                'userInfo.last_name as firstName',
-                'userInfo.phone',
-                'userSetting.locale',
-                'userSetting.promocode',
-                'userInfo.level',
-                'userModel.google2fa_secret as secret_key',
-            ])
-            ->selectRaw('!ISNULL(userModel.google2fa_secret) as has_2fa_code')
-            ->first()
-            ?->toArray();
-        return $result;
     }
 }
