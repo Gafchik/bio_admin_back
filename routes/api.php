@@ -32,5 +32,6 @@ Route::group(['middleware' => ['jwt.auth']],
         include 'Pages/ServerExplorer/server-explorer.php';
         include 'Pages/Roles/roles.php';
         include 'Pages/Trees/trees.php';
+        include 'Pages/Users/users.php';
     }
 );

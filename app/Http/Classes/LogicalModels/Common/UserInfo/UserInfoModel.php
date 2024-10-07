@@ -4,6 +4,7 @@ namespace App\Http\Classes\LogicalModels\Common\UserInfo;
 
 use App\Http\Classes\LogicalModels\Common\UserInfo\Exceptions\UserNotFoundException;
 use App\Http\Classes\Structure\WalletsType;
+use App\Models\MySql\Biodeposit\Activations;
 use App\Models\MySql\Biodeposit\DemoBalance;
 use App\Models\MySql\Biodeposit\DicCurrencies;
 use App\Models\MySql\Biodeposit\Trees;
@@ -25,6 +26,7 @@ class UserInfoModel
         private Trees $trees,
         private Roles $roles,
         private RoleUsers $roleUsers,
+        private Activations $activations,
     ){}
     public function getUserInfo(string $fieldName, string $fieldValue): array
     {
@@ -54,6 +56,7 @@ class UserInfoModel
                 'userInfo.updated_at',
                 'userInfo.codePromo',
                 'userInfo.level',
+                'activations.completed as is_active',
             ])
             ->first()
             ?->toArray();
@@ -78,6 +81,7 @@ class UserInfoModel
                 $user['wallet_futures_id'] = $wallet['id'];
             }
         }
+        $user['wallets'] = [...$wallets];
         return $user;
     }
 
@@ -89,6 +93,11 @@ class UserInfoModel
                 'userModel.id',
                 '=',
                 'userInfo.user_id'
+            )
+            ->leftJoin($this->activations->getTable() . ' as activations',
+                'userModel.id',
+                '=',
+                'activations.user_id'
             );
     }
     private function getUserRole(int $userId): ?array
@@ -129,6 +138,7 @@ class UserInfoModel
             ->select([
                 'id',
                 'type',
+                'balance'
             ])
             ->get()
             ->toArray();
