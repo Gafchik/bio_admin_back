@@ -3,6 +3,8 @@
 namespace App\Http\Classes\LogicalModels\Users;
 
 use App\Http\Classes\Helpers\PasswordHashHelper;
+use App\Http\Classes\Helpers\TransformArray\TransformArrayHelper;
+use App\Http\Classes\Structure\CDateTime;
 use App\Models\MySql\Biodeposit\{
     User_setting,
     UserInfo as UserInfoTable,
@@ -10,6 +12,8 @@ use App\Models\MySql\Biodeposit\{
     Trees,
     Activations,
     Wallets,
+    RoleUsers,
+    Referrals,
 };
 
 class UsersModel
@@ -21,6 +25,8 @@ class UsersModel
         private Trees $trees,
         private Activations $activations,
         private Wallets $wallets,
+        private RoleUsers $roleUsers,
+        private Referrals $referrals,
     ){}
 
     public function getUsers(): array
@@ -102,5 +108,41 @@ class UsersModel
                 ->where('user_id', $data['id'])
                 ->update(['completed' => (int)$data['is_active']]);
         });
+    }
+    public function editRoles(array $data): void
+    {
+        $userId = $data['id'];
+        $roleForAdd = array_column(TransformArrayHelper::callbackSearchAllInArray(
+            array: $data['roles'],
+            callback: fn($value) => $value['action'] === 'add'
+        ),'id');
+        $insertData = [];
+        foreach ($roleForAdd as $role) {
+            $insertData[] = [
+                'user_id' => $userId,
+                'role_id' => $role,
+                'created_at' => CDateTime::getCurrentDate(),
+                'updated_at' => CDateTime::getCurrentDate(),
+            ];
+        }
+        $roleForDelete = array_column(TransformArrayHelper::callbackSearchAllInArray(
+            array: $data['roles'],
+            callback: fn($value) => $value['action'] === 'delete'
+        ),'id');
+
+        $this->roleUsers->getConnection()->transaction(function () use ($userId, $insertData, $roleForDelete) {
+            $this->roleUsers->insert($insertData);
+            $this->roleUsers
+                ->where('user_id', $userId)
+                ->whereIn('role_id', $roleForDelete)
+                ->delete();
+        });
+    }
+    public function getUsersReferals(int $id): array
+    {
+        return $this->referrals
+            ->where('user_id',$id)
+            ->get()
+            ->toArray();
     }
 }

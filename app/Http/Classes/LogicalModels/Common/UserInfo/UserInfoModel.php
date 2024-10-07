@@ -67,10 +67,7 @@ class UserInfoModel
         $user['demo_balance'] = $this->getDemoBalance($user['id']);
         $user['trees'] = $this->getUserTress($user['id']);
         $roles = $this->getUserRole($user['id']);
-        $user['roles'] = [
-          'role' => $roles['role_id'] ?? null,
-          'permissions' => json_decode($roles['permissions'] ?? '[]',true),
-        ];
+        $user['roles'] = $roles;
         $wallets = $this->getWallets($user['id']);
         foreach ($wallets as $wallet){
             if($wallet['type'] === WalletsType::LIVE_PAY){
@@ -100,7 +97,7 @@ class UserInfoModel
                 'activations.user_id'
             );
     }
-    private function getUserRole(int $userId): ?array
+    private function getUserRole(int $userId): array
     {
         return $this->roleUsers
             ->from($this->roleUsers->getTable(). ' as roleUsers')
@@ -110,8 +107,8 @@ class UserInfoModel
                 'roleUsers.role_id'
             )
             ->where('roleUsers.user_id',$userId)
-            ->first()
-            ?->toArray();
+            ->get()
+            ->toArray();
     }
     private function getDemoBalance(int $userId): array
     {

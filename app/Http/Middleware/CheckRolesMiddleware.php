@@ -17,14 +17,23 @@ class CheckRolesMiddleware
     public function handle(Request $request, Closure $next,string ...$allowedRoles ): Response
     {
         $user = UserInfoFacade::getUserInfo('id',Auth::user()->id);
-        $userPermissions = array_keys(array_filter(
-            $user['roles']['permissions'] ?? [],
-            fn($role) => !!$role
-        ));
-        if(in_array('superuser',$userPermissions)){
+        $userRolePermissions = [];
+        foreach ($user['roles'] as $role) {
+            $permissions = json_decode($role['permissions'], true) ?? [];
+            $filteredPermissions = array_filter($permissions, function ($value) {
+                return $value === true;
+            });
+            $userRolePermissions = array_merge($userRolePermissions, $filteredPermissions);
+        }
+        $userPermissions = json_decode($user['permissions'], true);
+        $filteredUserPermissions = array_filter($userPermissions, function ($value) {
+            return $value === true;
+        });
+        $userRolePermissions = array_merge($userRolePermissions, $filteredUserPermissions);
+        if(in_array('superuser',$userRolePermissions)){
             return $next($request);
         }
-        if (empty(array_intersect($allowedRoles, $userPermissions))) {
+        if (empty(array_intersect($allowedRoles, $userRolePermissions))) {
             return ResponseFacade::makeBadResponse(new PermissionDeniedException());
         }
         return $next($request);
