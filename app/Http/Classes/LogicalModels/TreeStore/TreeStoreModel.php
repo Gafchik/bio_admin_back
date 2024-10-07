@@ -18,6 +18,20 @@ class TreeStoreModel
         private UserInfo $userInfo,
         private Trees $trees,
     ){}
+    public function getPlantingDatesTreeStore(): array
+    {
+        return $this->trees_on_sale
+            ->from($this->trees_on_sale->getTable() . ' as t')
+            ->join($this->trees->getTable() . ' as tr',
+                't.tree_id',
+                '=',
+                'tr.id'
+            )
+            ->selectRaw('YEAR(tr.planting_date) as planting_year')
+            ->distinct()
+            ->pluck('planting_year')
+            ->toArray();
+    }
 
     public function getTreeStore(array $data): array
     {
@@ -74,8 +88,8 @@ class TreeStoreModel
             }
 
             // Фильтр по годам
-            if (!empty($data['year'])) {
-                $query->whereRaw('YEAR(tr.planting_date) = ?', [$data['year']]);
+            if(isset($data['plantingDate'])){
+                $query->whereYear('tr.planting_date', $data['plantingDate']);
             }
 
         }

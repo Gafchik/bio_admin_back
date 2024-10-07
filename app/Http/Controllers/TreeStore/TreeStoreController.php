@@ -15,6 +15,12 @@ class TreeStoreController extends BaseController
     {
         parent::__construct();
     }
+    public function getPlantingDatesTreeStore(): JsonResponse
+    {
+        return $this->makeGoodResponse(
+            $this->model->getPlantingDatesTreeStore()
+        );
+    }
     public function getTreeStore(Request $request): JsonResponse
     {
         return $this->makeGoodResponse(

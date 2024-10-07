@@ -12,5 +12,10 @@ Route::group(
                     'superuser',
                     'administrator'
                 ]));
+        Route::post('/get-planting-dates-tree-store', [TreeStoreController::class, 'getPlantingDatesTreeStore'])
+            ->middleware('checkRoles:' . implode(',', [
+                    'superuser',
+                    'administrator',
+                ]));
     }
 );
