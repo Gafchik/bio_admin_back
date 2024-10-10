@@ -11,6 +11,7 @@ use App\Models\MySql\Biodeposit\Trees;
 use App\Models\MySql\Biodeposit\UserInfo as UserInfoTable;
 use App\Models\MySql\Biodeposit\Users;
 use App\Models\MySql\Biodeposit\Wallets;
+use App\Models\MySql\Biodeposit\User_setting;
 use App\Models\MySql\Biodeposit\Roles;
 use App\Models\MySql\Biodeposit\RoleUsers;
 use Illuminate\Database\Eloquent\Builder;
@@ -27,6 +28,7 @@ class UserInfoModel
         private Roles $roles,
         private RoleUsers $roleUsers,
         private Activations $activations,
+        private User_setting $userSetting,
     ){}
     public function getUserInfo(string $fieldName, string $fieldValue): array
     {
@@ -57,6 +59,20 @@ class UserInfoModel
                 'userInfo.codePromo',
                 'userInfo.level',
                 'activations.completed as is_active',
+                'userSetting.max_number_trees_for_sale',
+                'userSetting.shop_commission',
+                'userSetting.gift_commission',
+                'userSetting.shop_commission_first_sale',
+                'userSetting.shop_commission_gift_sale',
+                'userSetting.promocode',
+                'userSetting.promocode_discount',
+                'userSetting.promocode_bonus',
+                'userSetting.promocode_wallet',
+                'userSetting.promocode_multiple',
+                'userSetting.show_popup',
+                'userSetting.promocode_area',
+                'userSetting.promocode_tree_min',
+                'userSetting.promocode_tree_max',
             ])
             ->first()
             ?->toArray();
@@ -90,6 +106,11 @@ class UserInfoModel
                 'userModel.id',
                 '=',
                 'userInfo.user_id'
+            )
+            ->leftJoin($this->userSetting->getTable() . ' as userSetting',
+                'userModel.id',
+                '=',
+                'userSetting.user_id'
             )
             ->leftJoin($this->activations->getTable() . ' as activations',
                 'userModel.id',

@@ -28,4 +28,8 @@ class Users
     {
         $this->model->editRoles($data);
     }
+    public function editSetting(array $data): void
+    {
+        $this->model->editSetting($data);
+    }
 }

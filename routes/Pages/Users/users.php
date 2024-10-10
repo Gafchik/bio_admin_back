@@ -32,5 +32,10 @@ Route::group(
                     'superuser',
                     'administrator'
                 ]));
+        Route::post('/edit-setting', [UsersController::class, 'editSetting'])
+            ->middleware('checkRoles:' . implode(',', [
+                    'superuser',
+                    'administrator'
+                ]));
     }
 );

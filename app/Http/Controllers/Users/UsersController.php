@@ -71,6 +71,11 @@ class UsersController extends BaseController
         $this->model->editRoles($validated);
         return $this->makeGoodResponse([]);
     }
+    public function editSetting(Request $request): JsonResponse
+    {
+        $this->model->editSetting($request->toArray());
+        return $this->makeGoodResponse([]);
+    }
 }
 
 

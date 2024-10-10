@@ -5,6 +5,7 @@ namespace App\Http\Classes\LogicalModels\Users;
 use App\Http\Classes\Helpers\PasswordHashHelper;
 use App\Http\Classes\Helpers\TransformArray\TransformArrayHelper;
 use App\Http\Classes\Structure\CDateTime;
+use App\Http\Facades\UserInfoFacade;
 use App\Models\MySql\Biodeposit\{
     User_setting,
     UserInfo as UserInfoTable,
@@ -144,5 +145,40 @@ class UsersModel
             ->where('user_id',$id)
             ->get()
             ->toArray();
+    }
+    public function editSetting(array $data)
+    {
+        $userId = $data['id'];
+        $user = UserInfoFacade::getUserInfo('id',$userId);
+        $this->userModel->getConnection()->transaction(function () use ($user,$data) {
+            $this->updateWallets($user,$data);
+            $this->updateUserSetting($user,$data);
+        });
+    }
+    private function updateUserSetting(array $user,array $data): void
+    {
+        $this->userSetting
+            ->where('user_id', $user['id'])
+            ->update([
+                'promocode' => $data['promocode'],
+                'promocode_discount' => $data['promocode_discount'],
+                'promocode_bonus' => $data['promocode_bonus'],
+                'promocode_wallet' => $data['promocode_wallet'],
+                'promocode_multiple' => $data['promocode_multiple'],
+                'promocode_area' => json_encode($data['promocode_area']),
+                'promocode_tree_min' => $data['promocode_tree_min'],
+                'promocode_tree_max' => $data['promocode_tree_max'],
+                'max_number_trees_for_sale' => $data['max_number_trees_for_sale'],
+                'shop_commission' => $data['shop_commission'],
+                'gift_commission' => $data['gift_commission'],
+                'shop_commission_first_sale' => $data['shop_commission_first_sale'],
+                'shop_commission_gift_sale' => $data['shop_commission_gift_sale'],
+            ]);
+    }
+    private function updateWallets(array $user,array $data): void
+    {
+        $this->wallets->where('id', $user['wallet_live_pay_id'])->update(['balance' => $data['live_wallet_balance']]);
+        $this->wallets->where('id', $user['wallet_bonus_id'])->update(['balance' => $data['bonus_wallet_balance']]);
+        $this->wallets->where('id', $user['wallet_futures_id'])->update(['balance' => $data['futures_wallet_balance']]);
     }
 }
